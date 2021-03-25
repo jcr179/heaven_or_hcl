@@ -1,0 +1,56 @@
+Joystick name: Controller (XBOX 360 For Windows)
+(DS4 with ds4windows on, Hitbox in 360 mode)
+# axes: 5
+axis 0: -
+axis 1: -
+axis 2: -0.996=RT/R2, +0.996=LT/L2
+axis 3: -
+axis 4: - 
+# buttons: 10 
+b0: A/cross 
+b1: B/circle 
+b2: X/square 
+b3: Y/triangle 
+b4: LB/L1 
+b5: RB/R1 
+b6: Back/share
+b7: Start/start 
+b8: L3/L3 
+b9: R3/R3 
+# hats: 1
+hat 0 values: tuple: numpad notation
+    (0, 0): 5
+    (1, 0): 6
+    (0, -1): 2
+    (-1, 0): 4
+    (0, 1): 8
+    (1, -1): 3
+    (-1, -1): 1
+    (-1, 1): 7
+    (1, 1): 9
+
+Joystick name: Wireless Controller (DS4 without ds4windows),  P4 Wired Gamepad V1.6 (Hitbox in PS4 mode)
+# axes: 6
+axis 0: 1.0 = LS right , -1.0 = LS left 
+axis 1: 1.0 = LS down, -1.0 = LS up 
+axis 2: 1.0 = RS right, -1.0 = RS left 
+axis 3: 1.0 = RS down, -1.0 = RS up 
+axis 4: 1.0 = R2 pressed, -1.0 = R2 idle 
+axis 5: 1.0 = L2 pressed, -1.0 = L2 idle
+# buttons: 14
+b0: square
+b1: cross 
+b2: circle 
+b3: triangle 
+b4: L1
+b5: R1 
+b6: L2 (goes to 1 if pressed even slightly)
+b7: R2 (goes to 1 if pressed even slightly)
+b8: options 
+b9: start 
+b10: L3 
+b11: R3 
+b12: ps button 
+b13: touchpad click 
+# hats: 1 
+

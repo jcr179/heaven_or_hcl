@@ -9,7 +9,7 @@ from move_detection import fsm_hcl, tick_hcl, frc_frame1, frc_frame2
 from UI_Button import UI_Button
 import sys 
 import time 
-from config_read import get_mapping_from_file
+from config_read import *
 
 from ctypes import windll
 
@@ -22,6 +22,8 @@ if os.path.isdir(check_dir):
 
 else:
     print("Image directory ", check_dir, " does not exist.")
+debug = False
+
 
 SetWindowPos = windll.user32.SetWindowPos
 
@@ -30,14 +32,41 @@ NOMOVE = 2
 TOPMOST = -1
 NOT_TOPMOST = -2
 
-def alwaysOnTop(yesOrNo):
-    zorder = (NOT_TOPMOST, TOPMOST)[yesOrNo] # choose a flag according to bool 0 or 1
+def alwaysOnTop(topmost):
+    zorder = (NOT_TOPMOST, TOPMOST)[topmost] # choose a flag according to bool 0 or 1
     hwnd = pygame.display.get_wm_info()['window'] # handle to the window
     SetWindowPos(hwnd, zorder, 0, 0, 0, 0, NOMOVE|NOSIZE)
 
 pygame.init()
 
 alwaysOnTop(1)
+
+# Joystick and controller type
+pygame.joystick.init()
+joystick_count = pygame.joystick.get_count()
+if joystick_count:
+    joystick = pygame.joystick.Joystick(0)
+else:
+    print("No controller detected. Exiting safely.")
+    sys.exit(0)
+name = joystick.get_name()
+print("Controller detected: ", name)
+
+controller_type = None
+if 'XBOX' in name:
+    controller_type = 'xbox'
+elif 'Wireless' in name or 'P4' in name or 'PS4' in name or 'ps4' in name:
+    controller_type = 'ps4'
+
+override_detected_controller_type = get_override("config.txt")
+
+if override_detected_controller_type:
+    controller_type = get_controller_type("config.txt")
+    print("Overriding detected controller type, using controller type specified in config: ", controller_type)
+
+if controller_type not in ['xbox', 'ps4']:
+    print("Please set config controller type to a valid value, and config_override=1. See config.txt or README. Exiting safely.")
+    sys.exit(0)
 
 """
 Constants
@@ -47,34 +76,49 @@ surf_y_size = 320
 num_inputs = 9 # Xbox 360 controller : direction, a,b,x,y,lt,rt,lb,rb
 
 xb_button_map = {0: "A", 1: "B", 2: "X", 3: "Y", 4: "LB", 5: "RB", 6: "Back", 7: "Start", 8: "L3", 9: "R3"}
-xb_valid_button_nums = set([0, 1, 2, 3, 4, 5, 6])
+xb_valid_button_nums = set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 xb_axis_map = {-0.996: "RT", 0.996: "LT"}
 xb_dir_map = {(0, 0): 5, (1, 0): 6, (0, -1): 2, (-1, 0): 4, (0, 1): 8, (1, -1): 3, (-1, -1): 1, (-1, 1): 7, (1, 1): 9}
 xb_held_axes = {"LT": False, "RT": False}
 xb_axis_released = ""
 
-"""
+
 ps_button_map = {0: "Square", 1: "Cross", 2: "Circle", 3: "Triangle", 4: "L1", 5: "R1", 6: "L2", 7: "R2", 8: "Back", 9: "Start", 
-    10: "L3", 11: "R3"}
-ps_valid_button_nums = set([0, 1, 2, 3, 4, 5, 6, 7, 8])
-ps_axis_map = {-0.996: "RT", 0.996: "LT"}
+    10: "L3", 11: "R3", 12: "PS Button", 13: "Touchpad"}
+ps_valid_button_nums = set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+ps_axis_map = {}
 ps_dir_map = {(0, 0): 5, (1, 0): 6, (0, -1): 2, (-1, 0): 4, (0, 1): 8, (1, -1): 3, (-1, -1): 1, (-1, 1): 7, (1, 1): 9}
-ps_held_axes = {"LT": False, "RT": False}
+ps_held_axes = {}
 ps_axis_released = ""
-"""
 
-# LT+RT not supported; this gives same reading as no triggers pressed
-xb_held_buttons = {}
-for val in xb_button_map.values():
-    xb_held_buttons[val] = -1
-for val in xb_axis_map.values():
-    xb_held_buttons[val] = -1
+if controller_type == 'xbox':
+    button_map = xb_button_map
+    valid_button_nums = xb_valid_button_nums
+    axis_map = xb_axis_map 
+    dir_map = xb_dir_map 
+    held_axes = xb_held_axes 
+    axis_released = xb_axis_released 
 
-xb_held_buttons_frames = {}
-for val in xb_button_map.values():
-    xb_held_buttons_frames[val] = 0
-for val in xb_axis_map.values():
-    xb_held_buttons_frames[val] = 0
+elif controller_type == 'ps4':
+    button_map = ps_button_map
+    valid_button_nums = ps_valid_button_nums
+    axis_map = ps_axis_map 
+    dir_map = ps_dir_map 
+    held_axes = ps_held_axes 
+    axis_released = ps_axis_released
+
+# LT+RT not supported for 360; this gives same reading as no triggers pressed
+held_buttons = {}
+for val in button_map.values():
+    held_buttons[val] = -1
+for val in axis_map.values():
+    held_buttons[val] = -1
+
+held_buttons_frames = {}
+for val in button_map.values():
+    held_buttons_frames[val] = 0
+for val in axis_map.values():
+    held_buttons_frames[val] = 0
 
 app_name = "Heaven or HCL"
 screen, clock = init_screen_and_clock(surf_x_size, surf_y_size, app_name)
@@ -133,9 +177,6 @@ hitstop_delay = 0 # Increment this with each frame as a counter to see if you've
 pygame.mixer.init()
 pygame.mixer.music.load(os.path.join('resources', 'sfx', 'hcl-6frc6.ogg')) # inaudible when GG window is focused
 
-# Joystick
-pygame.joystick.init()
-
 # Get ready to print text and initialize start position
 x_margin=10
 y_margin=10
@@ -149,7 +190,6 @@ buttonPressed = False
 buttonReleased = False
 
 
-debug = False
 
 
 # Interface graphics 
@@ -186,7 +226,7 @@ kimochi_x_scale = 117
 kimochi_y_scale = 67
 img_kimochi = pygame.transform.scale(pygame.image.load(os.path.join(check_dir, 'kimochi.png')), (kimochi_x_scale, kimochi_y_scale)).convert()
 
-# Default arcade layout for now.
+"""
 gg_button_map = {
     'X' : 'k',
     'A' : 'p',
@@ -195,7 +235,9 @@ gg_button_map = {
     'RT' : 'd',
     'Back' : 'select'
 }
-gg_button_map = get_mapping_from_file('config.txt')
+"""
+gg_button_map = get_mapping_from_file('config.txt', controller_type, override_detected_controller_type)
+print('Button mapping loaded: ', gg_button_map)
 
 overlay_x_offset = 0
 overlay_y_offset = -20
@@ -208,7 +250,7 @@ overlay_base = pygame.transform.rotozoom(overlay_base, overlay_rotate_deg, overl
 overlay_btn = pygame.transform.rotozoom(overlay_btn, overlay_rotate_deg, overlay_scale_factor).convert()
 overlay_balltop = pygame.transform.rotozoom(overlay_balltop, overlay_rotate_deg, overlay_scale_factor).convert()
 
-overlay_map = {
+xb_overlay_map = {
     0: [176 + overlay_x_offset/overlay_scale_factor, 175 + overlay_y_offset/overlay_scale_factor],      # A
     1: [256 + overlay_x_offset/overlay_scale_factor, 145 + overlay_y_offset/overlay_scale_factor],      # B
     2: [193 + overlay_x_offset/overlay_scale_factor, 87 + overlay_y_offset/overlay_scale_factor],       # X
@@ -227,6 +269,32 @@ overlay_map = {
     (-1,1): [7 + overlay_x_offset/overlay_scale_factor, 84 + overlay_y_offset/overlay_scale_factor],   # up back 
     (1,-1): [63 + overlay_x_offset/overlay_scale_factor, 134 + overlay_y_offset/overlay_scale_factor]    # down forward
 }
+
+ps_overlay_map = {
+    1: [176 + overlay_x_offset/overlay_scale_factor, 175 + overlay_y_offset/overlay_scale_factor],      # Cross
+    2: [256 + overlay_x_offset/overlay_scale_factor, 145 + overlay_y_offset/overlay_scale_factor],      # Circle
+    0: [193 + overlay_x_offset/overlay_scale_factor, 87 + overlay_y_offset/overlay_scale_factor],       # Square
+    3: [271 + overlay_x_offset/overlay_scale_factor, 52 + overlay_y_offset/overlay_scale_factor],       # Triangle
+    4: [445 + overlay_x_offset/overlay_scale_factor, 52 + overlay_y_offset/overlay_scale_factor],       # L1
+    5: [359 + overlay_x_offset/overlay_scale_factor, 52 + overlay_y_offset/overlay_scale_factor],       # R1
+    6: [428 + overlay_x_offset/overlay_scale_factor, 146 + overlay_y_offset/overlay_scale_factor],      # L2
+    7: [342 + overlay_x_offset/overlay_scale_factor, 145 + overlay_y_offset/overlay_scale_factor],      # R2
+    (0,0): [35 + overlay_x_offset/overlay_scale_factor, 109 + overlay_y_offset/overlay_scale_factor],   # neutral
+    (0,1): [35 + overlay_x_offset/overlay_scale_factor, 84 + overlay_y_offset/overlay_scale_factor],    # up
+    (0,-1): [35 + overlay_x_offset/overlay_scale_factor, 134 + overlay_y_offset/overlay_scale_factor],  # down 
+    (1,0): [63 + overlay_x_offset/overlay_scale_factor, 109 + overlay_y_offset/overlay_scale_factor],   # forward 
+    (-1,0): [7 + overlay_x_offset/overlay_scale_factor, 109 + overlay_y_offset/overlay_scale_factor],   # back
+    (1,1): [63 + overlay_x_offset/overlay_scale_factor, 84 + overlay_y_offset/overlay_scale_factor],   # up forward
+    (-1,-1): [7 + overlay_x_offset/overlay_scale_factor, 134 + overlay_y_offset/overlay_scale_factor],   # down back
+    (-1,1): [7 + overlay_x_offset/overlay_scale_factor, 84 + overlay_y_offset/overlay_scale_factor],   # up back 
+    (1,-1): [63 + overlay_x_offset/overlay_scale_factor, 134 + overlay_y_offset/overlay_scale_factor]    # down forward
+}
+
+if controller_type == 'xbox':
+    overlay_map = xb_overlay_map
+elif controller_type == 'ps4':
+    overlay_map = ps_overlay_map
+
 for key, val in overlay_map.items():
     overlay_map[key] = (val[0]*overlay_scale_factor, val[1]*overlay_scale_factor)
 
@@ -294,38 +362,38 @@ while run:
 
         if event.type == pygame.JOYBUTTONDOWN:
             print("Joystick button pressed:", event.button)
-            xb_held_buttons[xb_button_map[event.button]] = 0
+            held_buttons[button_map[event.button]] = 0
 
         elif event.type == pygame.JOYBUTTONUP:
             print("Joystick button released:", event.button)
-            xb_held_buttons_frames[xb_button_map[event.button]] = xb_held_buttons[xb_button_map[event.button]]
-            xb_held_buttons[xb_button_map[event.button]] = -1
+            held_buttons_frames[button_map[event.button]] = held_buttons[button_map[event.button]]
+            held_buttons[button_map[event.button]] = -1
 
         elif event.type == pygame.JOYAXISMOTION:
             axisValue = round(event.value, 3)
             if event.axis == 2 and axisValue == -0.996:
                 print("Joystick button pressed: RT")
-                xb_held_axes["RT"] = True
-                xb_held_buttons[xb_axis_map[axisValue]] = 0
-            elif event.axis == 2 and axisValue == 0.0 and xb_held_axes["RT"]:
+                held_axes["RT"] = True
+                held_buttons[axis_map[axisValue]] = 0
+            elif event.axis == 2 and axisValue == 0.0 and held_axes.get("RT", None):
                 print("Joystick button released: RT")
-                xb_held_axes["RT"] = False
-                xb_axis_released = "RT"
-                xb_held_buttons_frames[xb_axis_released] = xb_held_buttons[xb_axis_map[-0.996]]
-                xb_held_buttons[xb_axis_map[-0.996]] = -1
+                held_axes["RT"] = False
+                axis_released = "RT"
+                held_buttons_frames[axis_released] = held_buttons[axis_map[-0.996]]
+                held_buttons[axis_map[-0.996]] = -1
             if event.axis == 2 and axisValue == 0.996:
                 print("Joystick button pressed: LT")
-                xb_held_axes["LT"] = True 
-                xb_held_buttons[xb_axis_map[axisValue]] = 0
-            elif event.axis == 2 and axisValue == 0.0 and xb_held_axes["LT"]:
+                held_axes["LT"] = True 
+                held_buttons[axis_map[axisValue]] = 0
+            elif event.axis == 2 and axisValue == 0.0 and held_axes.get("LT", None):
                 print("Joystick button released: LT")
-                xb_held_axes["LT"] = False 
-                xb_axis_released = "LT"
-                xb_held_buttons_frames[xb_axis_released] = xb_held_buttons[xb_axis_map[0.996]]
-                xb_held_buttons[xb_axis_map[0.996]] = -1
+                held_axes["LT"] = False 
+                axis_released = "LT"
+                held_buttons_frames[axis_released] = held_buttons[axis_map[0.996]]
+                held_buttons[axis_map[0.996]] = -1
 
         elif event.type == pygame.JOYHATMOTION:
-            print("Direction ", xb_dir_map[event.value])
+            print("Direction ", dir_map[event.value])
     
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
@@ -343,7 +411,7 @@ while run:
                 hitstop_changed = 1
 
             elif ui_btn_config.rect.collidepoint(mouse_pos):
-                gg_button_map = get_mapping_from_file('config.txt')
+                gg_button_map = get_mapping_from_file('config.txt', controller_type, override_detected_controller_type)
                 config_changed = 1
 
             elif ui_btn_help.rect.collidepoint(mouse_pos):
@@ -411,7 +479,7 @@ while run:
             hitstop_changed = 0
 
     if config_changed:
-        textPrintTips.print(screen, "Button config loaded.", color=(0,0,0))
+        textPrintTips.print(screen, "Button config applied.", color=(0,0,0))
         config_changed += 1
         if config_changed >= 180:
             config_changed = 0
@@ -475,10 +543,10 @@ while run:
 
     # Have only 1 plugged in when starting, TODO make a class and put this into a library, call all these checks
     """ Begin Xbox 360 """
-    joystick_check = pygame.joystick.get_count()
-    if joystick_check == 0:
-        print('No controller detected. Please connect controller before running program. Exiting safely.')
-        break
+    #joystick_check = pygame.joystick.get_count()
+    #if joystick_check == 0:
+    #    print('No controller detected. Please connect controller before running program. Exiting safely.')
+    #    break
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
     name = joystick.get_name()
@@ -488,26 +556,36 @@ while run:
 
     buttons = joystick.get_numbuttons()
     input_btns = []
-    for button_num in xb_button_map:
+    for button_num in button_map:
         button = joystick.get_button(button_num)
 
-        if button and button_num in xb_valid_button_nums:
-            input_btns.append(gg_button_map.get(xb_button_map[button_num], ''))
+        if button and button_num in valid_button_nums:
+            input_btns.append(gg_button_map.get(button_map[button_num], ''))
 
             if debug: 
-                textPrint.print(screen, "{}".format(xb_button_map[button_num]))
+                textPrint.print(screen, "{}".format(button_map[button_num]))
 
-            if button_num != 6: # If it's any button other than Select, blit to overlay
-                screen.blit(overlay_btn, [overlay_x_pos+overlay_map[button_num][0]-overlay_x_offset, overlay_y_pos+overlay_map[button_num][1]-overlay_y_offset])
-            elif button_num == 6 and not side_switch_btn_pressed:
-                side_prev = side 
-                if side == 'p1': side = 'p2'
-                else: side = 'p1'
+            if controller_type == 'xbox':
+                if button_num != 6 and button_map[button_num] not in ['Start', 'Select', 'Back', 'L3', 'R3']: # If it's any button other than Select, blit to overlay
+                    screen.blit(overlay_btn, [overlay_x_pos+overlay_map[button_num][0]-overlay_x_offset, overlay_y_pos+overlay_map[button_num][1]-overlay_y_offset])
+                elif button_num == 6 and not side_switch_btn_pressed:
+                    side_prev = side 
+                    if side == 'p1': side = 'p2'
+                    else: side = 'p1'
+                    side_switch_btn_pressed = True
+
+            elif controller_type == 'ps4':
+                if button_num != 8 and button_map[button_num] not in ['Start', 'Select', 'Back', 'L3', 'R3']: # If it's any button other than Select, blit to overlay
+                    screen.blit(overlay_btn, [overlay_x_pos+overlay_map[button_num][0]-overlay_x_offset, overlay_y_pos+overlay_map[button_num][1]-overlay_y_offset])
+                elif button_num == 8 and not side_switch_btn_pressed:
+                    side_prev = side 
+                    if side == 'p1': side = 'p2'
+                    else: side = 'p1'
+                    side_switch_btn_pressed = True
                 
-                side_switch_btn_pressed = True
-            xb_held_buttons[xb_button_map[button_num]] += 1
+            held_buttons[button_map[button_num]] += 1
             if debug:
-                print(xb_held_buttons[xb_button_map[button_num]], xb_button_map[button_num])
+                print(held_buttons[button_map[button_num]], button_map[button_num])
 
     if 'select' not in input_btns:
         side_switch_btn_pressed = False
@@ -519,39 +597,37 @@ while run:
         input_btns.append(gg_button_map.get('LT', ''))
 
         if debug:
-            textPrint.print(screen, "{}".format(xb_axis_map[axis]))
+            textPrint.print(screen, "{}".format(axis_map[axis]))
 
         screen.blit(overlay_btn, [overlay_x_pos+overlay_map[axis][0]-overlay_x_offset, overlay_y_pos+overlay_map[axis][1]-overlay_y_offset])
-        xb_held_buttons[xb_axis_map[axis]] += 1
+        held_buttons[axis_map[axis]] += 1
         if debug:
-            print(xb_held_buttons[xb_axis_map[axis]], xb_axis_map[axis])
+            print(held_buttons[axis_map[axis]], axis_map[axis])
     elif axis == -0.996:
         input_btns.append(gg_button_map.get('RT', ''))
 
         if debug:
-            textPrint.print(screen, "{}".format(xb_axis_map[axis]))
+            textPrint.print(screen, "{}".format(axis_map[axis]))
 
         screen.blit(overlay_btn, [overlay_x_pos+overlay_map[axis][0]-overlay_x_offset, overlay_y_pos+overlay_map[axis][1]-overlay_y_offset])
-        xb_held_buttons[xb_axis_map[axis]] += 1
+        held_buttons[axis_map[axis]] += 1
         if debug:
-            print(xb_held_buttons[xb_axis_map[axis]], xb_axis_map[axis])   
+            print(held_buttons[axis_map[axis]], axis_map[axis])   
 
     # Get directional input
     hat = joystick.get_hat(0)
     if debug:
-        textPrint.print(screen, "{}".format(xb_dir_map[hat]))
+        textPrint.print(screen, "{}".format(dir_map[hat]))
 
-    input_btns.append(str(xb_dir_map[hat]))
+    input_btns.append(str(dir_map[hat]))
 
     if debug:
         textPrint.print(screen, "{}".format("".join([str(item) for item in input_btns])))
     
-    # TODO fix for hold directions ; charge moves
-    if xb_dir_map[hat] != 5 and xb_dir_map[hat] != prevDir:
-        pass
+   
 
     screen.blit(overlay_balltop, [overlay_x_pos+overlay_map[hat][0]-overlay_x_offset, overlay_y_pos+overlay_map[hat][1]-overlay_y_offset])
-    prevDir = xb_dir_map[hat]
+    prevDir = dir_map[hat]
      
     """ End Xbox 360 """
 
