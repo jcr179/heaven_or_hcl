@@ -1,0 +1,18 @@
+# Config type. Options=[xbox] ...ps4, keyboard coming
+type=xbox
+
+# Guilty Gear button config: xbox_(X, A, Y, RB, RT, Back, LB, Start)
+k=xbox_X
+p=xbox_A
+s=xbox_Y
+h=xbox_RB
+d=xbox_RT
+select=xbox_Back
+
+# Guilty Gear button config (ps4)
+#k=ps4_Square
+#p=ps4_Cross
+#s=ps4_Triangle
+#h=ps4_R1
+#d=ps4_R2
+#select=ps4_Back
