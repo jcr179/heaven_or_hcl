@@ -16,6 +16,12 @@ from ctypes import windll
 
 # Meta
 version = "v0.1"
+check_dir = os.path.join(os.getcwd(), "resources", "images")
+if os.path.isdir(check_dir):
+    img_dir = check_dir
+
+else:
+    print("Image directory ", check_dir, " does not exist.")
 
 SetWindowPos = windll.user32.SetWindowPos
 
@@ -74,7 +80,7 @@ app_name = "Heaven or HCL"
 screen, clock = init_screen_and_clock(surf_x_size, surf_y_size, app_name)
 fonts = create_fonts([32, 16, 14, 8])
 fps = 60 # include config setting for 58-62 fps?
-app_icon = pygame.image.load('icon2.png')
+app_icon = pygame.image.load(os.path.join(check_dir, 'icon2.png'))
 pygame.display.set_icon(app_icon)
 
 
@@ -125,8 +131,7 @@ hitstop_delay = 0 # Increment this with each frame as a counter to see if you've
 
 # SFX
 pygame.mixer.init()
-pygame.mixer.music.load('hcl-6frc6.ogg') # inaudible when GG window is focused
-#sfx_guide = pygame.mixer.Sound('hcl-6frc6.ogg')
+pygame.mixer.music.load(os.path.join('resources', 'sfx', 'hcl-6frc6.ogg')) # inaudible when GG window is focused
 
 # Joystick
 pygame.joystick.init()
@@ -152,34 +157,34 @@ ino_x_scale = 78
 ino_y_scale = 140
 ino_x_pos = 20
 ino_y_pos = 40
-img_ino_p1 = pygame.transform.scale(pygame.image.load('ino_p1.png'), (ino_x_scale, ino_y_scale)).convert()
-img_ino_p2 = pygame.transform.scale(pygame.image.load('ino_p2.png'), (ino_x_scale, ino_y_scale)).convert()
+img_ino_p1 = pygame.transform.scale(pygame.image.load(os.path.join(check_dir, 'ino_p1.png')), (ino_x_scale, ino_y_scale)).convert()
+img_ino_p2 = pygame.transform.scale(pygame.image.load(os.path.join(check_dir, 'ino_p2.png')), (ino_x_scale, ino_y_scale)).convert()
 first_ino_drawn = False
 
 ino_success_x_scale = 78 #168
 ino_success_y_scale = 140 #240
 ino_success_x_pos = 20
 ino_success_y_pos = 40
-img_ino_success_p1 = pygame.transform.scale(pygame.image.load('ino_success_p1.png'), (ino_success_x_scale, ino_success_y_scale)).convert()
-img_ino_success_p2 = pygame.transform.scale(pygame.image.load('ino_success_p2.png'), (ino_success_x_scale, ino_success_y_scale)).convert()
+img_ino_success_p1 = pygame.transform.scale(pygame.image.load(os.path.join(check_dir, 'ino_success_p1.png')), (ino_success_x_scale, ino_success_y_scale)).convert()
+img_ino_success_p2 = pygame.transform.scale(pygame.image.load(os.path.join(check_dir, 'ino_success_p2.png')), (ino_success_x_scale, ino_success_y_scale)).convert()
 
 frame_counter_x_pos = 215
 frame_counter_y_pos = 186
-img_frame_counter = pygame.image.load('frame_counter.png').convert()
+img_frame_counter = pygame.image.load(os.path.join(check_dir, 'frame_counter.png')).convert()
 frame_counter_drawn = False
 
 speech_x_pos = 110
 speech_y_pos = 50
 speech_x_scale = 176
 speech_y_scale = 120
-img_speech = pygame.transform.scale(pygame.image.load('speech-bubble.png'), (speech_x_scale, speech_y_scale)).convert()
+img_speech = pygame.transform.scale(pygame.image.load(os.path.join(check_dir, 'speech-bubble.png')), (speech_x_scale, speech_y_scale)).convert()
 first_attempt = True
 
 kimochi_x_pos = 145
 kimochi_y_pos = 95
 kimochi_x_scale = 117
 kimochi_y_scale = 67
-img_kimochi = pygame.transform.scale(pygame.image.load('kimochi.png'), (kimochi_x_scale, kimochi_y_scale)).convert()
+img_kimochi = pygame.transform.scale(pygame.image.load(os.path.join(check_dir, 'kimochi.png')), (kimochi_x_scale, kimochi_y_scale)).convert()
 
 # Default arcade layout for now.
 gg_button_map = {

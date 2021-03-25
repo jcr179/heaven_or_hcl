@@ -1,4 +1,4 @@
-# Config type. Options=[xbox] ...ps4, keyboard coming
+# Config type. Options=[xbox, ps4] keyboard coming
 type=xbox
 
 # Guilty Gear button config: xbox_(X, A, Y, RB, RT, Back, LB, Start)
