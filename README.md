@@ -1,6 +1,8 @@
 # Heaven or HCL
 A training tool to help GGXXAC+R I-no players develop their execution.
 
+![preview image](resources/images/hohcl.PNG)
+
 ## What is this tool?
 Heaven or HCL (HoHCL, hohcl) is a minimal application that is meant to be running alongside an instance of Guilty Gear XX Accent Core Plus R (+R). This is intended to be a utility that helps measure the timing of a player's inputs relative to the required timings needed for I-no players to execute a horizontal chemical love (hcl) dash-split force roman cancel (6frc6), which is a difficult but important barrier to overcome when maximizing I-no's destructive potential.
 
@@ -83,3 +85,12 @@ The program will throw some false positives and false negatives. That's unavoida
 - Hitstop offset support for jumping normals
 - SFX for different hitstop offsets
 - Force window on top of focused +R window
+
+# Help/contact/feedback
+Game knowledge used to create this was pulled from the [Dustloop wiki](http://dustloop.com/wiki/index.php?title=GGACR/I-No) and the friendly folks at the [GGXXAC+R discord](https://discord.com/invite/zQ8eAsC). Come say hi in the #i-no channel. [Sprites were from this very helpful rip](http://www.guiltygear.ru/download.php?sect=sprites) by Kaihoku_ic. 
+
+Is your controller not recognized correctly or at all? Plug it in, run the "Get Controller Name" program. It'll generate a file "Controller name.txt" in the same directory as the program. Tell me what appears in the resulting "Controller name.txt" file and I'll try and add support. 
+
+You can reach me on Discord by Zenryoku#2982 or my Youtube channel above for questions, feedback, comments, etc.
+
+If you want to improve/extend the code feel free to make a pull request. The source code is in the main branch of this repo.
