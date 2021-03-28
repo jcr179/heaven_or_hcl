@@ -802,7 +802,7 @@ while run:
         textPrintHelp.print(screen,
             "* You can switch sides with whatever button you mapped to select/back.")
         textPrintHelp.print(screen,
-            "* Due to Pygame limitations, detected inputs may be ≤ 2f early.")
+            "* Due to Pygame limitations, detected inputs may be at most 2f inaccurate.")
         textPrintHelp.print(screen,
             "* Full documentation and more at https://github.com/jcr179/heaven_or_hcl")
         textPrintHelp.print(screen, "")
@@ -814,7 +814,7 @@ while run:
         textPrintHelp.print(screen, "")
 
         textPrintHelp.print(screen,
-            "# " + version + ", by Zenryoku#2982 from FGC@UCLA.")
+            "# " + version + ", by Zenryoku from FGC@UCLA. Discord: Zenryoku#2982")
 
         textPrintHelp.reset(newline_spacing=12)
     """ Help display end"""
