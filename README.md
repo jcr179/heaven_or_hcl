@@ -1,5 +1,5 @@
 # Heaven or HCL
-A training tool to help GGXXAC+R I-no players develop their execution.
+A training tool to help GGXXAC+R I-no players develop their execution. [Watch the demonstration video here.](https://www.youtube.com/watch?v=ji9JAX0ixAY&ab_channel=ZenryokuFGC)
 
 ![preview image](resources/images/hohcl.PNG)
 
