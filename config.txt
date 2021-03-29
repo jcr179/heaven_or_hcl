@@ -1,9 +1,9 @@
 # Config type. Options=[xbox, ps4] keyboard coming
-# config_override: 0 if you want controller type to be automatically chosen, 1 if you want config to override detected ctrl. type
+# config_override: ignore
 type=xbox
-config_override=0
+config_override=1
 
-# Guilty Gear button config: xbox_(X, A, Y, RB, RT, Back, LB, Start)
+# Guilty Gear button config for xbox 360 controllers: xbox_(X, A, Y, RB, RT, Back, LB, Start)
 k=xbox_X
 p=xbox_A
 s=xbox_Y
@@ -11,7 +11,7 @@ h=xbox_RB
 d=xbox_RT
 select=xbox_Back
 
-# Guilty Gear button config: ps4_(Square, Cross, Triangle, Circle, R1, R2, L1, L2, Start, Back)
+# Guilty Gear button config for ps4 controllers: ps4_(Square, Cross, Triangle, Circle, R1, R2, L1, L2, Start, Back)
 k=ps4_Square
 p=ps4_Cross
 s=ps4_Triangle

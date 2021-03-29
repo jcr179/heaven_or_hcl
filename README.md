@@ -5,7 +5,14 @@ A training tool to help GGXXAC+R I-no players develop their execution.
 Heaven or HCL (HoHCL, hohcl) is a minimal application that is meant to be running alongside an instance of Guilty Gear XX Accent Core Plus R (+R). This is intended to be a utility that helps measure the timing of a player's inputs relative to the required timings needed for I-no players to execute a horizontal chemical love (hcl) dash-split force roman cancel (6frc6), which is a difficult but important barrier to overcome when maximizing I-no's destructive potential.
 
 ## How do I use it?
-To download the program from github, click the green "Code" button in the top-right of this window displaying this file. Click "Download ZIP" and take note of where on your machine it was downloaded to. Unzip the zip file to the directory of your choice. Navigate to the heaven_or_hcl directory. **Plug in your controller before starting the program; it will not work if you don't have a controller plugged in**. Open the "Heaven or HCL" executable file. Now you're ready to rock!
+To download the program from github: 
+1. Click the green "Code" button in the top-right of this window displaying this file. 
+2. Click "Download ZIP" and take note of where on your machine it was downloaded to. 
+3. Unzip the zip file to the directory of your choice. 
+4. Navigate to the heaven_or_hcl directory. 
+5. **Plug in your controller before starting the program; it will not work if you don't have a controller plugged in**. 
+6. In **config.txt**, set the value of `type=` to `xbox` or `ps4` depending on your controller. It's set to xbox by default.
+7. Open the "Heaven or HCL" executable file. Now you're ready to rock!
 
 The main display consists of a sprite of I-no with timing adjustment suggestions communicated through her speech bubble. There is a stick/button layout overlay to give feedback of what inputs are being read by the program. Below that is a timeline showing frame-by-frame inputs read after the start of an hcl. Details of how this is detected and timed are explored later in this README. Below the timeline is a checklist of conditions needed to be met for an hcl 6frc6 to be executed successfully, updated based on your last attempt at a hcl 6frc6.
 
@@ -40,10 +47,10 @@ The file config.txt is what the program reads to know your button mappings.
 You won't need to touch this if you use the default rainbow layout. (p, k, s, h, d)
 
 `type=[xbox, ps4]`
-The value of this can be either `xbox` or `ps4`, and is `xbox` by default. You can generally ignore this as the program tries to detect what type your controller is, but you can set to one of these values based on your controller type if the program guesses wrong.
+The value of this can be either `xbox` or `ps4`, and is `xbox` by default. 
 
 `config_override[0, 1]`
-On the off chance that your xbox controller is detected as a ps4 controller or vice versa, set this to 1 so that the `type` value you set above will be used. Otherwise just leave it to 0 so the program can automatically detect your controller type.
+~~On the off chance that your xbox controller is detected as a ps4 controller or vice versa, set this to 1 so that the `type` value you set above will be used. Otherwise just leave it to 0 so the program can automatically detect your controller type.~~ You can ignore this for the current release (it's hardcoded to 1 in the program).
 
 `k=xbox_[X, A, Y, RB, RT, Back, LB, Start]`
 Set xbox_`anything from the above list` to set what button on your xbox controller you want to be bound to k (kick). The same idea follows for buttons p, s, h, d, back/select. If you're using a ps4 controller you can ignore this.

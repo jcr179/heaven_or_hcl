@@ -53,12 +53,17 @@ name = joystick.get_name()
 print("Controller detected: ", name)
 
 controller_type = None
+
+"""
 if 'XBOX' in name:
     controller_type = 'xbox'
 elif 'Wireless' in name or 'P4' in name or 'PS4' in name or 'ps4' in name:
     controller_type = 'ps4'
 
 override_detected_controller_type = get_override("config.txt")
+"""
+
+override_detected_controller_type = True
 
 if override_detected_controller_type:
     controller_type = get_controller_type("config.txt")
