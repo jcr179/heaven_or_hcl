@@ -3,12 +3,13 @@
 type=xbox
 config_override=1
 
-# Guilty Gear button config for xbox 360 controllers: xbox_(X, A, Y, RB, RT, Back, LB, Start)
+# Guilty Gear button config for xbox 360 controllers: xbox_(X, A, Y, B, RB, RT, Back, LB, Start)
 k=xbox_X
 p=xbox_A
 s=xbox_Y
 h=xbox_RB
 d=xbox_RT
+pks=xbox_B
 select=xbox_Back
 
 # Guilty Gear button config for ps4 controllers: ps4_(Square, Cross, Triangle, Circle, R1, R2, L1, L2, Start, Back)
@@ -17,4 +18,5 @@ p=ps4_Cross
 s=ps4_Triangle
 h=ps4_R1
 d=ps4_R2
+pks=ps4_Circle
 select=ps4_Back

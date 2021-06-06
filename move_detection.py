@@ -95,7 +95,8 @@ def tick_hcl(frame_num, timeline, input_state, input_btns, side):
     # FRC
     elif input_state == 3 and (set(['p', 'k', 's']).issubset(input_btns) or 
             set(['p', 'k', 'h']).issubset(input_btns) or 
-            set(['k', 's', 'h']).issubset(input_btns)):
+            set(['k', 's', 'h']).issubset(input_btns) or
+            'pks' in input_btns):
         if frc_frame1 <= frame_num <= frc_frame2:
             output_state = 4
         if 'f' not in timeline:
@@ -122,7 +123,7 @@ def tick_hcl(frame_num, timeline, input_state, input_btns, side):
             input_saved = True
 
     # track frc success regardless of 6frc6 attempt
-    if (set(['p', 'k', 's']).issubset(input_btns) or set(['p', 'k', 'h']).issubset(input_btns) or set(['k', 's', 'h']).issubset(input_btns)) and 'f' not in timeline:
+    if (set(['p', 'k', 's']).issubset(input_btns) or set(['p', 'k', 'h']).issubset(input_btns) or set(['k', 's', 'h']).issubset(input_btns) or 'pks' in input_btns) and 'f' not in timeline:
         timeline[frame_num] = 'f'
         input_saved = True
 
